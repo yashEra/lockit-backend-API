@@ -27,7 +27,7 @@ const db = admin.firestore();
 
 // routs 
 app.get("/", (req, res) => {
-    return res.status(200).send("lockit api working");
+    return res.status(200).sendFile('index.html', { root: __dirname }); 
 });
 
 // app.post("/create-user", (req, res) => {
@@ -362,7 +362,7 @@ app.get("/device/:deviceID", (req, res) => {
             let response = deviceDetails?.data();
 
             let device = {
-                id: response?.id,
+                deviceID: response?.deviceID,
                 owner: response?.owner,
                 status: response?.status,
                 active: response?.active,
@@ -389,7 +389,7 @@ app.get("/devices/:ownerID", async (req, res) => {
         const devices = devicesQuerySnapshot.docs.map(deviceDoc => {
             const deviceData = deviceDoc.data();
             return {
-                id: deviceData.id,
+                deviceID: deviceData.deviceID,
                 owner: deviceData.owner,
                 status: deviceData.status,
                 active: deviceData.active,
@@ -413,7 +413,7 @@ app.get("/all-devices", (req, res) => {
                 let docs = data.docs;
                 docs.map((doc) => {
                     const device = {
-                        id: doc?.data()?.id,
+                        deviceID: doc?.data()?.deviceID,
                         owner: doc?.data()?.owner,
                         status: doc?.data()?.status,
                         active: doc?.data()?.active,
