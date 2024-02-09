@@ -1,0 +1,4 @@
+node_modules/
+
+#firebase api key
+serviceAccountKey.json
