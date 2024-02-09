@@ -1,4 +1,4 @@
-# This project representing the smart lcok system BackEnd
+# This project representing the smart lockit system BackEnd
 
 ## Available Scripts
 
