@@ -6,7 +6,7 @@ const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccountKey.json");
-
+ 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
@@ -66,9 +66,11 @@ app.post("/register", async (req, res) => {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         // user.password = hashedPassword;
 
+        var currentTime = Date.now();
+
         // Create user in the database
-        await db.collection("userDetails").doc(`/${Date.now()}/`).create({
-            id: Date.now(),
+        await db.collection("userDetails").doc(`/${currentTime}/`).create({
+            id: currentTime,
             username: req.body.username,
             email: req.body.email,
             phoneNumber: req.body.phoneNumber,
@@ -204,25 +206,31 @@ app.get("/users", (req, res) => {
     })();
 })
 
-app.put("/user/:id", (req, res) => {
+app.put("/user/:id", async (req, res) => {
+    try {
+        const reqDoc = db.collection("userDetails").doc(req.params.id);
+        await reqDoc.update({
+            username: req.body.username,
+            email: req.body.email,
+            phoneNumber: req.body.phoneNumber,
+        });
 
-    (async () => {
-        try {
-            const reqDoc = db.collection("userDetails").doc(req.params.id);
-            await reqDoc.update({
-                username: req.body.username,
-                email: req.body.email,
-                phoneNumber: req.body.phoneNumber,
-            })
+        // Fetch the updated user details from the database
+        const updatedUserSnapshot = await reqDoc.get();
+        const updatedUser = updatedUserSnapshot.data();
 
-            return res.status(200).send({ status: true, message: "user updated successfully" })
+        // Remove sensitive fields from the user object
+        delete updatedUser.id;
+        delete updatedUser.password;
 
-        } catch (error) {
-            return res.status(500).send({ status: false, message: error })
-        }
-    })();
+        return res.status(200).send({ status: true, message: "User updated successfully", user: updatedUser });
 
+    } catch (error) {
+        return res.status(500).send({ status: false, message: error });
+    }
 });
+
+
 
 app.delete("/user/:id", (req, res) => {
 
